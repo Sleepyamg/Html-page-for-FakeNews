@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fake News Detector</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        text-align: center;
+        background: #f9f9f9;
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      }
+      textarea {
+        width: 100%;
+        height: 120px;
+        margin-bottom: 15px;
+        padding: 10px;
+        font-size: 16px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .result {
+        margin-top: 20px;
+        font-size: 18px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📰 Fake News Detector</h1>
+    <p>Enter a news headline or text below:</p>
+    <textarea
+      id="newsInput"
+      placeholder="Type your news text here..."
+    ></textarea>
+    <br />
+    <button onclick="checkNews()">Check</button>
+    <div class="result" id="result"></div>
+
+    <script>
+      async function checkNews() {
+        const inputText = document.getElementById("newsInput").value.trim();
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "⏳ Checking...";
+
+        if (!inputText) {
+          resultDiv.innerHTML = "⚠️ Please enter some text.";
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            "https://ahmedmohamed04-fake-news-detector-lora.hf.space/predict",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ text: inputText }),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("API error: " + response.status);
+          }
+
+          const data = await response.json();
+          resultDiv.innerHTML = `✅ Prediction: <span style="color: ${
+            data.prediction === "fake" ? "red" : "green"
+          }">${data.prediction.toUpperCase()}</span><br>
+        🔍 Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+        } catch (error) {
+          resultDiv.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+    </script>
+  </body>
+</html>
